@@ -1,0 +1,17 @@
+{
+  "name": "i18n-unused-message-finder",
+  "module": "i18n-unused-message-finder",
+  "type": "module",
+  "devDependencies": {
+    "bun-types": "latest",
+    "@typescript-eslint/parser": "latest",
+    "@typescript-eslint/eslint-plugin": "latest",
+    "eslint": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "p-limit": "^4.0.0"
+  }
+}
