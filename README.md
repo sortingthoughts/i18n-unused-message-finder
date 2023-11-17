@@ -1,8 +1,8 @@
 # i18n unused message finder
 
-This is a little tool to find unused i18n messages in a project. It is currently a work in progress.
+This is a tool designed to find i18n messages that are defined as properties in a project but are not being used.
 
-All message keys of the given i18nMessageFile will be searched in the given projectFolder. If a message is not found, it will be printed to the console and written to an output file.
+All message keys of the given `i18nMessageFile` will be searched in the given `projectFolder`. If a message is not found, it will be printed to the console and added to a json result file.
 
 The message key will be searched in the following files:
 
@@ -18,17 +18,13 @@ The message key will be searched in the following files:
 - .h
 - .java
 
-The search is not 100% correct because only the message key is searched as string with surrounding quotes like " and '. So if the message key is used in a variable or function name, it will be found as well.
+> [!CAUTION]  
+> The search is not 100% correct because only the message key is searched as `string` with surrounding quotes like `"` and `'` or with a beginning `.`
+> If the message key is used in a concat operation or as a variable, it will not be found.
 
 ## Usage
 
-via standalone bundle file:
-
-```bash
-i18nUnusedFinder <projectFolder> <i18nMessageFile>
-```
-
-or install dependencies:
+install dependencies:
 
 ```bash
 bun install
@@ -37,12 +33,12 @@ bun install
 and run:
 
 ```bash
-bun run ../i18n-unused-message-finder/src/index.ts <projectFolder> <i18nMessageFile>
+bun run ./src/index.ts <projectFolder> <i18nMessageFile>
 ```
 
-## Build bundle file
+## Build a bundle file
 
-Standalone bundle file was created with:
+Standalone bundle file can be created with:
 
 ```bash
 bun build ./src/index.ts --compile --minify --outfile ./bundle/i18nUnusedFinder
