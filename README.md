@@ -52,4 +52,3 @@ bun build ./src/index.ts --compile --minify --outfile ./bundle/i18nUnusedFinder
 
 - [bun](https://bun.sh), see also [bun license](https://bun.sh/docs/project/licensing)
 - [typescript](https://www.typescriptlang.org/)
-- [p-limit](https://www.npmjs.com/package/p-limit) v4.0.0 at the moment, we can't use newer versions because buns missing support for async hooks

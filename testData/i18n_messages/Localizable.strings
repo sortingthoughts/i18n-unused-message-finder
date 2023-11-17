@@ -4,8 +4,11 @@
 
 USED_MESSAGE_D = "used";
 USED_MESSAGE_A = "used";
-USED_MESSAGE_B = "unused";
+USED_MESSAGE_B = "used";
 USED_MESSAGE_C = "used";
+USED_MESSAGE_E = "used";
+USED_MESSAGE_F = "used";
+
 UNUSED_MESSAGE_A = "used"
 UNUSED_MESSAGE_B = "used";
 UNUSED_MESSAGE_C = "used"

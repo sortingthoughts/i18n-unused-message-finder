@@ -1,5 +1,4 @@
 import * as fs from "fs";
-import pLimit from "p-limit";
 
 /**
  * The MessageSearcher class is used to search for unused message keys in multiple project.
@@ -11,12 +10,9 @@ import pLimit from "p-limit";
  * The key must be surrounded by double quotes which represents the start and end of the key.
  */
 export class MessageSearcher {
-  private readonly outputFileName = "result.json";
-  private readonly keyPatternDoubleQuotes: string = '"MSG_KEY"';
-  private readonly keyPatternSingleQuotes: string = "'MSG_KEY'";
   private readonly folderPath: string;
   private readonly messageKeys: string[];
-  private readonly limit = pLimit(100); // limit the number of concurrent executions for search in files
+  private foundMesssagKeys: string[]; // only for testing
 
   private readonly includeFileExtensions: string[] = [
     ".swift",
@@ -46,6 +42,7 @@ export class MessageSearcher {
       throw new Error("messageKeys are required");
     }
 
+    this.foundMesssagKeys = [];
     this.folderPath = folderPath;
     this.messageKeys = messageKeys;
   }
@@ -57,49 +54,31 @@ export class MessageSearcher {
    */
   public async searchUnusedMessageKeys(): Promise<string[]> {
     const files = this.getFilesOfFolder(this.folderPath);
-    console.log("Check " + files.length + " files in project folder");
-
-    const searchInFile = async (filePath: string, key: string) => {
+    console.log("Checking " + files.length + " files in project folder...");
+  
+    let keys = new Set(this.messageKeys);
+  
+    const searchInFile = async (filePath: string) => {
       // read the file content
       const fileContent = await Bun.file(filePath).text();
-      const doubleQuotes: string = this.keyPatternDoubleQuotes.replace(
-        "MSG_KEY",
-        key
-      );
-      const singleQuotes = this.keyPatternSingleQuotes.replace("MSG_KEY", key);
-
+  
       // check if message key is used in file
-      return (
-        fileContent.includes(doubleQuotes) || fileContent.includes(singleQuotes)
-      );
+      keys = new Set([...keys].filter(key => {
+        const escapedKey = this.escapeRegExp(key);
+        // the key must be surrounded by double quotes 
+        // or single quotes 
+        // or a beginning dot
+        const pattern = new RegExp(`"${escapedKey}"|'${escapedKey}'|\\.${escapedKey}`);
+        const findKey = pattern.test(fileContent);
+        if (findKey) {
+          this.foundMesssagKeys.push(key);
+        } 
+        return !findKey;
+      }));
     };
-
-    const searchMessageKeyInFiles = async (
-      files: string[],
-      messageKey: string
-    ) => {
-      const searchPromises = files.map((filePath) =>
-        this.limit(() => searchInFile(filePath, messageKey))
-      );
-      const searchResults = await Promise.all(searchPromises);
-
-      // check if message key is used in any file
-      return searchResults.includes(true);
-    };
-
-    const result: string[] = [];
-
-    for (const messageKey of this.messageKeys) {
-      const isUsed = await searchMessageKeyInFiles(files, messageKey);
-      if (!isUsed) {
-        result.push(messageKey);
-      }
-    }
-
-    // write the result to file
-    await Bun.write(this.outputFileName, JSON.stringify(result));
-
-    return result.sort();
+  
+    await Promise.all(files.map(filePath => searchInFile(filePath)));
+    return Array.from(keys);
   }
 
   /**
@@ -130,6 +109,15 @@ export class MessageSearcher {
 
     return files;
   }
+ 
+  /**
+   * Escapes the given string for usage in a regular expression.
+   * @param str the string to escape
+   * @returns the escaped string
+   */
+  private escapeRegExp(str: string) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+  }
 
   /**
    * Checks if the given file name has one of an allowed file extensions.
@@ -138,5 +126,13 @@ export class MessageSearcher {
    */
   private hasIncludeFileExtension(name: string): boolean {
     return this.includeFileExtensions.some((ext) => name.endsWith(ext));
+  }
+
+  /**
+   * Gets the found message keys, only for testing.
+   * @returns found message keys
+   */
+  public getFoundMesssagKeys(): string[] {
+    return this.foundMesssagKeys;
   }
 }

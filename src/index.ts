@@ -36,6 +36,7 @@ console.log("Found " + messageKeys.length + " message keys in i18n file");
 
 const messageSearcher = new MessageSearcher(projectFolderPath, messageKeys);
 const unusedMessageKeys = await messageSearcher.searchUnusedMessageKeys();
+await Bun.write("result.json", JSON.stringify(unusedMessageKeys.sort()));
 const duration = Date.now() - startTime;
 
 console.log(

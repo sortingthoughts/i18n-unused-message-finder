@@ -14,6 +14,7 @@ test("must find unused message keys", async () => {
   const unusedMessageKeys = await searcher.searchUnusedMessageKeys();
 
   expect(unusedMessageKeys.length).toBe(3);
+  expect(searcher.getFoundMesssagKeys().length).toBe(6);
   expect(unusedMessageKeys[0]).toBe("UNUSED_MESSAGE_A");
   expect(unusedMessageKeys[1]).toBe("UNUSED_MESSAGE_B");
   expect(unusedMessageKeys[2]).toBe("UNUSED_MESSAGE_C");
