@@ -1,18 +1,14 @@
 import * as fs from "fs";
 
 /**
- * The MessageSearcher class is used to search for unused message keys in multiple project.
- * Each project is represented by the first sub folder of the given folder path.
- * All project folders are searched for files with the listed file extensions of the
+ * The MessageSearcher class is used to search for unused message keys in multiple folders.
+ * In all folders it will be only searched for files with the listed file extensions of the
  * includeFileExtensions property.
- *
- * The Message key is searched only by the key name in a case sensitive way.
- * The key must be surrounded by double quotes which represents the start and end of the key.
  */
 export class MessageSearcher {
   private readonly folderPath: string;
   private readonly messageKeys: string[];
-  private foundMesssagKeys: string[]; // only for testing
+  private foundMessageKeys: string[]; // only for testing
 
   private readonly includeFileExtensions: string[] = [
     ".swift",
@@ -42,42 +38,46 @@ export class MessageSearcher {
       throw new Error("messageKeys are required");
     }
 
-    this.foundMesssagKeys = [];
+    this.foundMessageKeys = [];
     this.folderPath = folderPath;
     this.messageKeys = messageKeys;
   }
 
   /**
-   * Search for unused message keys in the given project folder.
+   * Search for unused message keys in the given folder.
    *
    * @returns a list of unused message keys
    */
   public async searchUnusedMessageKeys(): Promise<string[]> {
     const files = this.getFilesOfFolder(this.folderPath);
     console.log("Checking " + files.length + " files in project folder...");
-  
+
     let keys = new Set(this.messageKeys);
-  
+
     const searchInFile = async (filePath: string) => {
       // read the file content
       const fileContent = await Bun.file(filePath).text();
-  
+
       // check if message key is used in file
-      keys = new Set([...keys].filter(key => {
-        const escapedKey = this.escapeRegExp(key);
-        // the key must be surrounded by double quotes 
-        // or single quotes 
-        // or a beginning dot
-        const pattern = new RegExp(`"${escapedKey}"|'${escapedKey}'|\\.${escapedKey}`);
-        const findKey = pattern.test(fileContent);
-        if (findKey) {
-          this.foundMesssagKeys.push(key);
-        } 
-        return !findKey;
-      }));
+      keys = new Set(
+        [...keys].filter((key) => {
+          const escapedKey = this.escapeRegExp(key);
+          // the key must be surrounded by double quotes
+          // or single quotes
+          // or a beginning dot
+          const pattern = new RegExp(
+            `"${escapedKey}"|'${escapedKey}'|\\.${escapedKey}`
+          );
+          const findKey = pattern.test(fileContent);
+          if (findKey) {
+            this.foundMessageKeys.push(key);
+          }
+          return !findKey;
+        })
+      );
     };
-  
-    await Promise.all(files.map(filePath => searchInFile(filePath)));
+
+    await Promise.all(files.map((filePath) => searchInFile(filePath)));
     return Array.from(keys);
   }
 
@@ -109,14 +109,14 @@ export class MessageSearcher {
 
     return files;
   }
- 
+
   /**
    * Escapes the given string for usage in a regular expression.
    * @param str the string to escape
    * @returns the escaped string
    */
   private escapeRegExp(str: string) {
-    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+    return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
   }
 
   /**
@@ -132,7 +132,7 @@ export class MessageSearcher {
    * Gets the found message keys, only for testing.
    * @returns found message keys
    */
-  public getFoundMesssagKeys(): string[] {
-    return this.foundMesssagKeys;
+  public getFoundMessageKeys(): string[] {
+    return this.foundMessageKeys;
   }
 }
