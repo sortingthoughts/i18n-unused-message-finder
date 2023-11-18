@@ -36,6 +36,12 @@ and run:
 bun run ./src/index.ts <projectFolder> <i18nMessageFile>
 ```
 
+if you want automatically clean the unused messages from the `i18nMessageFile`, you can use the `--clean` flag:
+
+```bash
+bun run ./src/index.ts --clean <projectFolder> <i18nMessageFile>
+```
+
 ## Build a bundle file
 
 Standalone bundle file can be created with:

@@ -41,15 +41,7 @@ export class MessageReader {
     const messageKeys: string[] = [];
 
     // check if filePath exists
-    const messageFile: BunFile = Bun.file(this._filePath);
-    const fileExist = await messageFile.exists;
-    if (!fileExist) {
-      throw new Error("Message file does not exist: " + this._filePath);
-    }
-
-    // read file content
-    const fileContent = await messageFile.text();
-    const fileContentLines = fileContent.split("\n");
+    const fileContentLines = await this.readFileContentLines();
 
     // iterate over each line
     fileContentLines.forEach((line) => {
@@ -62,6 +54,23 @@ export class MessageReader {
     });
 
     return messageKeys;
+  }
+
+  /**
+   * Reads the file content and returns the lines of the file.
+   * @returns lines of the file
+   */
+  private async readFileContentLines() {
+    const messageFile: BunFile = Bun.file(this._filePath);
+    const fileExist = messageFile.exists;
+    if (!fileExist) {
+      throw new Error("Message file does not exist: " + this._filePath);
+    }
+
+    // read file content
+    const fileContent = await messageFile.text();
+    const fileContentLines = fileContent.split("\n");
+    return fileContentLines;
   }
 
   /**
@@ -104,5 +113,36 @@ export class MessageReader {
    */
   private getMessageKey(line: string): string {
     return line.substring(0, line.indexOf("=")).trim();
+  }
+
+  /**
+   * Removes the given message keys from the i18n file.
+   * Load the existing i18n file and remove the given message key.
+   * Then write the cleaned i18n file.
+   * @param unusedMessageKeys the message keys to remove
+   * @returns the number written bytes
+   */
+  public async cleanMessageKeys(unusedMessageKeys: string[]): Promise<number> {
+    const fileContentLines = await this.readFileContentLines();
+    const cleanedContentLines: string[] = [];
+
+    // iterate over each line
+    for (const line of fileContentLines) {
+      // check if line contains a message key
+      if (this.isMessageKey(line)) {
+        // get the message key from line
+        const messageKey = this.getMessageKey(line);
+        // check if message key is not in unused message keys
+        if (!unusedMessageKeys.includes(messageKey)) {
+          // add line to cleaned content lines
+          cleanedContentLines.push(line);
+        }
+      } else {
+        // add line to cleaned content lines
+        cleanedContentLines.push(line);
+      }
+    }
+
+    return await Bun.write(this._filePath, cleanedContentLines.join("\n"));
   }
 }

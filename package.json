@@ -1,6 +1,14 @@
 {
   "name": "i18n-unused-message-finder",
   "module": "i18n-unused-message-finder",
+  "version": "1.0.0",
+  "description": "Find unused i18n messages",
+  "author": "Hendrik Ebel",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sortingthoughts/i18n-unused-message-finder"
+  },
+  "license": "MIT",
   "type": "module",
   "devDependencies": {
     "bun-types": "latest",
